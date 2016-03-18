@@ -10,6 +10,11 @@ enable_language(Fortran)
 # packages may want to modify these   #
 # to suit, or just leave as defaults. #
 #######################################
+
+SET (REFPROP_FORTRAN_PATH
+        "FORTRAN"
+        CACHE STRING
+        "The path to the directory of the FORTRAN source files")
                          
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
@@ -46,8 +51,8 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   if (${DEFSYM_STR_INDEX} GREATER 0)
     set(DEFSYM_FLAG "--using-defsym")
   endif()
-  message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}")
-  execute_process(COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ${DEFSYM_FLAG}
+  message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
+  execute_process(COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG}
                   RESULT_VARIABLE GEN_ALIASES_RESULT
                   OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
                   ERROR_VARIABLE GEN_ALIASES_OUTPUT
@@ -71,15 +76,20 @@ if (MSVC)
   # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 else()
-  #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static")
 endif()
 
 # TODO: set to either REFPROP or REFPRP64
 set(NAME "REFPRP64")
 
 # Collect the source files
-file(GLOB APP_SOURCES "FORTRAN/*.FOR")
+file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
 
 add_library(${NAME} SHARED ${APP_SOURCES})
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS ${ALIASES_STRING})
+
+if (WIN32)
+  # Don't add a 'lib' prefix to the shared library if windows
+  set_target_properties(${NAME} PROPERTIES PREFIX "")
+endif()
