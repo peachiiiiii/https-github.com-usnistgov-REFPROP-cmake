@@ -29,14 +29,13 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 # My default, no symbol aliases are used
 set (ALIASES_STRING "")
 
+set (REFPROP_LINK_FLAGS "")
+
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
-  if (NOT WIN32)
-    set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -fPIC")
-    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fPIC")
-  endif()
+  
   # Now we need to determine whether gfortran uses --defsym or -alias to 
   # define symbol aliases for the linker
   execute_process(COMMAND gfortran -Wl,--defsym
@@ -60,23 +59,41 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   message(STATUS "${GEN_ALIASES_OUTPUT}") 
   file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
 
+  # On OSX, we want to statically link the libquadmath library, but gfortran is VERY
+  # insistent that it wants a dynamically linked libquadmath.  See also this open bug
+  # for gfortran: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46539
+  # For Mac systems
+  if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+    execute_process(COMMAND gfortran -print-file-name=libquadmath.a
+                    RESULT_VARIABLE LIBQUADMATH_CHECK_RESULT
+                    OUTPUT_VARIABLE LIBQUADMATH_CHECK_OUTPUT
+                    ERROR_VARIABLE LIBQUADMATH_CHECK_OUTPUT
+                    )
+    string(STRIP ${LIBQUADMATH_CHECK_OUTPUT} LIBQUADMATH_PATH)
+    message(STATUS "Path to libquadmath.a:" "${LIBQUADMATH_PATH}")
+    file(COPY ${LIBQUADMATH_PATH} 
+         DESTINATION .)
+    message(STATUS "Copied libquadmath.a here.")
+
+    # Now we construct the flags to be passed to linker
+    set(REFPROP_LINK_FLAGS " ${ALIASES_STRING} -static -static-libgfortran -static-libgcc ")
+
+    # This, in concert with the libquadmath logic above, ensures that libquadmath is statically
+    # linked rather than being dynamically linked.  We want a static link so that the shared
+    # library can be distributed to users without gfortran
+    set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -L. ")
+  endif()
+
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
-  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads /libs:static /MT")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od /libs:static /MT")
 else ()
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
   message ("No optimized Fortran compiler flags are known, we just try -O2...")
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
-endif()
-
-if (MSVC)
-  # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-else()
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static")
 endif()
 
 # TODO: set to either REFPROP or REFPRP64
@@ -87,9 +104,9 @@ file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
 
 add_library(${NAME} SHARED ${APP_SOURCES})
 
-set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS ${ALIASES_STRING})
-
 if (WIN32)
   # Don't add a 'lib' prefix to the shared library if windows
   set_target_properties(${NAME} PROPERTIES PREFIX "")
 endif()
+
+set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS}")
