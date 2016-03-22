@@ -59,6 +59,9 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   message(STATUS "${GEN_ALIASES_OUTPUT}") 
   file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
 
+  # Start off with the aliases
+  set (REFPROP_LINK_FLAGS "${ALIASES_STRING}")
+
   # On OSX, we want to statically link the libquadmath library, but gfortran is VERY
   # insistent that it wants a dynamically linked libquadmath.  See also this open bug
   # for gfortran: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46539
@@ -76,7 +79,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     message(STATUS "Copied libquadmath.a here.")
 
     # Now we construct the flags to be passed to linker
-    set(REFPROP_LINK_FLAGS " ${ALIASES_STRING} -static -static-libgfortran -static-libgcc ")
+    set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -static -static-libgfortran -static-libgcc ")
 
     # This, in concert with the libquadmath logic above, ensures that libquadmath is statically
     # linked rather than being dynamically linked.  We want a static link so that the shared
