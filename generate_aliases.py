@@ -42,9 +42,7 @@ def generate_aliases(tokens, mangling):
         In each tuple is the windows name, followed by the mangled name
     """
 
-    if mangling == '_setupdll_':
-        return [(t,'_'+t.lower()+'_') for t in tokens]
-    elif mangling == 'setupdll_':
+    if mangling == 'setupdll_':
         return [(t,t.lower()+'_') for t in tokens]
     elif mangling == '_setupdll':
         return [(t,'_'+t.lower()) for t in tokens]
@@ -57,13 +55,25 @@ def write_aliases(output_file, aliases, using_defsym):
     with open(output_file, 'w') as fp:
         fp.write('-Wl')
         if using_defsym:
-            for old, new in aliases:
-                fp.write(',--defsym,{0:s}={1:s}'.format(old,new))
+            for mixed_case, new in aliases:
+                # For some bizarre reason, OSX always wants a preceding underscore
+                # See https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/DynamicLibraryDesignGuidelines.html
+                if sys.platform == 'darwin':
+                    mixed_case = '_' + mixed_case
+                    new = '_' + new
+                fp.write(',--defsym,{0:s}={1:s}'.format(mixed_case,new))
         else:
-            for old, new in aliases:
-                fp.write(',-alias,{0:s},{1:s}'.format(new,old))
+            for mixed_case, new in aliases:
+                # For some bizarre reason, OSX always wants a preceding underscore
+                # See https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/DynamicLibraryDesignGuidelines.html
+                if sys.platform == 'darwin':
+                    mixed_case = '_' + mixed_case
+                    new = '_' + new
+                fp.write(',-alias,{0:s},{1:s}'.format(new,mixed_case))
 
 if __name__=='__main__':
+
+    print(sys.platform)
 
     # Uncomment for local testing of this script
     #sys.argv += ['--mangling','_setupdll_','-O','aliases.txt']
