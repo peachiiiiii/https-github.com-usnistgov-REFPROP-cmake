@@ -34,3 +34,7 @@ Notes
       cmake .. -G "Visual Studio 11 2012 Win64"
 
   Run ``cmake --help`` to see a complete list of supported generators (not all of which will support FORTRAN)
+
+  When building with a Visual Studio generator, you will want to ensure that you get a Release build, which is ensured by passing the flag ``--config Release`` to the build command, something like:
+
+      cmake --build . --config Release

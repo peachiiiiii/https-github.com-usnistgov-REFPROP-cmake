@@ -12,7 +12,7 @@ enable_language(Fortran)
 #######################################
 
 SET (REFPROP_FORTRAN_PATH
-        "FORTRAN"
+        "${CMAKE_CURRENT_SOURCE_DIR}/FORTRAN"
         CACHE STRING
         "The path to the directory of the FORTRAN source files")
                          
