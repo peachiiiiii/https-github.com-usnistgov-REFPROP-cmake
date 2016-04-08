@@ -26,10 +26,12 @@ endif ()
 # FFLAGS depend on the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
-# My default, no symbol aliases are used
+# By default, no symbol aliases are used
 set (ALIASES_STRING "")
-
+# By default, no additional link flags
 set (REFPROP_LINK_FLAGS "")
+# By default, no DEF file is generated/used
+set (DEF_FILE "")
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
@@ -51,7 +53,13 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     set(DEFSYM_FLAG "--using-defsym")
   endif()
   message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
-  execute_process(COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG}
+  set(BUILD_COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
+  # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are export to DLL
+  if (MINGW)
+    set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
+  endif()
+  set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/REFPROP.DEF")
+  execute_process(COMMAND ${BUILD_COMMAND}
                   RESULT_VARIABLE GEN_ALIASES_RESULT
                   OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
                   ERROR_VARIABLE GEN_ALIASES_OUTPUT
@@ -104,6 +112,8 @@ set(NAME "REFPRP64")
 
 # Collect the source files
 file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
+# Add the .DEF file if needed
+list(APPEND APP_SOURCES "${DEF_FILE}")
 
 add_library(${NAME} SHARED ${APP_SOURCES})
 

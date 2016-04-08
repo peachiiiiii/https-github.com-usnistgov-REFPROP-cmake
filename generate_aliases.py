@@ -71,20 +71,32 @@ def write_aliases(output_file, aliases, using_defsym):
                     new = '_' + new
                 fp.write(',-alias,{0:s},{1:s}'.format(new,mixed_case))
 
+def write_def_file(output_file, aliases):
+    """
+    Write a .DEF file that lists the symbols to be exported from the DLL
+
+    Only needed in MINGW on windows
+    """
+    with open(output_file,'w') as fp:
+        fp.write('EXPORTS ')
+        for mixed_case, new in aliases:
+            fp.write(mixed_case + " = " + new + '\n')
+
 if __name__=='__main__':
 
     print(sys.platform)
 
     # Uncomment for local testing of this script
-    #sys.argv += ['--mangling','_setupdll_','-O','aliases.txt']
+    #sys.argv += ['--mangling','setupdll_','-O','aliases.txt','--FORTRAN-path','R:/911FILES','--DEF-file','defs.DEF']
 
     # Parse args first
     import argparse
     parser = argparse.ArgumentParser(description='Run the symbol alias generator.')
-    parser.add_argument('--mangling', '-M', required = True, choices=['setupdll','_setupdll_','setupdll_','_setupdll'], help="A string for the mangled name of the SETUPdll function")
+    parser.add_argument('--mangling', '-M', required = True, choices=['setupdll','setupdll_','_setupdll'], help="A string for the mangled name of the SETUPdll function")
     parser.add_argument('--output-file', '-O', required = True, help="The file to which the command line snippet will be written")
     parser.add_argument('--using-defsym', nargs='?', const=True, default=False, help="If defined, --defsym aliases will be generated, otherwise -alias aliases will be generated")
-    parser.add_argument('--FORTRAN-path', nargs=1, default="", help="If defined, the path to the directory containing the FORTRAN source files")
+    parser.add_argument('--FORTRAN-path', nargs=1, default="", help="If defined, the path to the directory containing the FORTRAN source files, otherwise, FORTRAN relative to the working directory")
+    parser.add_argument('--DEF-file', nargs=1, default="", help="If defined, the path to the DEF file with the exported symbols (MINGW on windows only)")
     args = parser.parse_args()
     
     this_folder = os.path.dirname(__file__)
@@ -99,5 +111,8 @@ if __name__=='__main__':
     tokens = tokenize(header_path, FORTRAN_path)
     # Generate the aliases
     aliases = generate_aliases(tokens, args.mangling)
-    # Write the aliases to file as the command line argument to be used
+    # Write the aliases to file given by the command line argument output-file
     write_aliases(args.output_file, aliases, args.using_defsym)
+    if args.DEF_file:
+        # Write DEF file for MINGW gfortran
+        write_def_file(args.DEF_file[0], aliases)
