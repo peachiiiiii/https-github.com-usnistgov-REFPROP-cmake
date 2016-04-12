@@ -112,6 +112,19 @@ set(NAME "REFPRP64")
 
 # Collect the source files
 file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
+
+# Remove the files COMMONS.FOR and COMTRN.FOR for REFPROP < 9.1.1
+foreach (source ${APP_SOURCES})
+  string(FIND "${source}" "COMMONS.FOR" found_INDEX)
+  if (${found_INDEX} GREATER 0)
+    list(REMOVE_ITEM APP_SOURCES ${source})
+  endif()
+  string(FIND "${source}" "COMTRN.FOR" found_INDEX)
+  if (${found_INDEX} GREATER 0)
+    list(REMOVE_ITEM APP_SOURCES ${source})
+  endif()
+endforeach()
+
 # Add the .DEF file if needed
 list(APPEND APP_SOURCES "${DEF_FILE}")
 
