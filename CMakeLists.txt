@@ -57,8 +57,9 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are export to DLL
   if (MINGW)
     set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
+    set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/REFPROP.DEF")
   endif()
-  set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/REFPROP.DEF")
+  
   execute_process(COMMAND ${BUILD_COMMAND}
                   RESULT_VARIABLE GEN_ALIASES_RESULT
                   OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
