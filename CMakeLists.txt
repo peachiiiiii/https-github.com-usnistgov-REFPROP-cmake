@@ -34,9 +34,16 @@ set (REFPROP_LINK_FLAGS "")
 set (DEF_FILE "")
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
+  set(ARCH_FLAG "")
+  if (REFPROP_32BIT)
+    message(STATUS "Forcing 32-bit build and passing -m32 to compiler...")
+    set(ARCH_FLAG "-m32")
+  endif()
+
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 ${ARCH_FLAG}")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g ${ARCH_FLAG}")
   
   # Now we need to determine whether gfortran uses --defsym or -alias to 
   # define symbol aliases for the linker
@@ -76,7 +83,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # for gfortran: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46539
   # For Mac systems
   if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
-    execute_process(COMMAND gfortran -print-file-name=libquadmath.a
+    execute_process(COMMAND gfortran ${ARCH_FLAG} -print-file-name=libquadmath.a
                     RESULT_VARIABLE LIBQUADMATH_CHECK_RESULT
                     OUTPUT_VARIABLE LIBQUADMATH_CHECK_OUTPUT
                     ERROR_VARIABLE LIBQUADMATH_CHECK_OUTPUT
