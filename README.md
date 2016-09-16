@@ -18,6 +18,17 @@ Instructions
 5. cmake ..
 6. cmake --build .
 
+Once the shared library has been build, you will need to place it somewhere that your operating system knows where to find it.  On windows, that would be on the ``PATH`` environment variable.  On OSX, that would be one of the default shared library locations (see [apple docs](https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/UsingDynamicLibraries.html) ).
+
+OSX Notes
+---------
+
+* If you want to force a 32-bit build (I'm looking at you Excel 2016 on Mac), you can do:
+
+      cmake .. -DREFPROP_32BIT=ON
+
+* On OSX, it seems you need to use the ``homebrew`` version of ``gcc`` and ``gfortran``, which you can do with a ``brew install gcc`` once homebrew is installed
+
 Notes
 -----
 
