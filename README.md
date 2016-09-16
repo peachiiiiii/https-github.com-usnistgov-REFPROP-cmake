@@ -7,7 +7,7 @@ Why you should use this build system:
 * The windows-style mixed-case symbols are export on all platforms (for instance there is **ALWAYS** a ``SETUPdll`` symbol, which means you can write a clean cross-platform interface).  This magic is achieved with export aliases.
 * You can easily point the repo at a different version of the REFPROP sources, allowing for building/testing several versions of REFPROP in parallel
 
-Brought to you by Ian Bell, ian.bell@gmail.com
+Brought to you by Ian Bell, NIST, ian.bell@nist.gov
 
 ## License
 
