@@ -7,6 +7,15 @@ def tokenize(path_to_REFPROP_lib_h, path_to_FORTRAN):
     included in the shared library with their mixed-case windows-style
     symbols
     """
+    import re
+    a = re.compile(r"""subroutine 
+                       \s         # one whitespace character
+                       (\S+)      # THE THING WE ARE CAPTURING
+                       \s+        # one or more whitespace character
+                       \(         # the opening (
+                       """, re.VERBOSE)
+    PASS_CMN_tokens = re.findall(a, open(os.path.join(path_to_FORTRAN,"PASS_FTN.FOR"), 'r').read())
+
     with open(path_to_REFPROP_lib_h, 'r') as fp:
         lines = fp.readlines()
     tokens = []
@@ -14,18 +23,11 @@ def tokenize(path_to_REFPROP_lib_h, path_to_FORTRAN):
         if line.strip().startswith('X('):
             tok = line.rstrip('\\\n').strip().split('X(')[1].strip().rstrip(')')
             tokens.append(tok)
-    unresolved_tokens = []
-    # Now check that each of the functions can be found in at least one of the REFPROP files
-    # First try PASS_FTN
-    with open(os.path.join(path_to_FORTRAN,"PASS_FTN.FOR"), 'r') as fp:
-        PASS_FTN = fp.read()
-        for token in tokens:
-            if ' '+token not in PASS_FTN:
-                unresolved_tokens.append(token)
-    print("unresolved_tokens:",unresolved_tokens,'; skipping these aliases')
-    for unresolved in unresolved_tokens:
-        tokens.pop(tokens.index(unresolved))
-    return tokens
+
+    print("Missing from PASS_CMN_tokens: ", [t for t in tokens if t not in PASS_CMN_tokens])
+    print("Missing from REFPROP_lib.h:", [t for t in PASS_CMN_tokens if t not in tokens])
+
+    return PASS_CMN_tokens
 
 def generate_aliases(tokens, mangling):
     """

@@ -144,3 +144,9 @@ if (WIN32)
 endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS}")
+
+# Build the REFPROP.h header file to go with this shared library
+add_custom_command(TARGET ${NAME}
+                   POST_BUILD
+                   COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}"
+                   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
