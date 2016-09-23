@@ -3,18 +3,23 @@ import sys, os
 
 def tokenize(path_to_REFPROP_lib_h, path_to_FORTRAN):
     """
-    Consume the REFPROP header and generate a list of functions 
+    Consume the REFPROP PASS_FTN file and generate a list of functions 
     included in the shared library with their mixed-case windows-style
     symbols
     """
     import re
-    a = re.compile(r"""subroutine 
-                       \s         # one whitespace character
-                       (\S+)      # THE THING WE ARE CAPTURING
-                       \s+        # one or more whitespace character
-                       \(         # the opening (
+    a = re.compile(r"""^[^cC]      # string must not start with comment character (c or C)
+                       \s+        # match as many spaces as you like
+                       subroutine # ...
+                       \s+          # one whitespace character
+                       (.+)       # THE THING WE ARE CAPTURING
+                       \s+         # one or more whitespace character
+                       \(          # the opening (
                        """, re.VERBOSE)
-    PASS_CMN_tokens = re.findall(a, open(os.path.join(path_to_FORTRAN,"PASS_FTN.FOR"), 'r').read())
+	
+    PASS_CMN_tokens = []
+    for line in open(os.path.join(path_to_FORTRAN,"PASS_FTN.FOR"), 'r').readlines():
+        PASS_CMN_tokens += re.findall(a, line)
 
     with open(path_to_REFPROP_lib_h, 'r') as fp:
         lines = fp.readlines()
