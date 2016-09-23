@@ -88,6 +88,7 @@ def write_def_file(output_file, aliases):
         fp.write('EXPORTS ')
         for mixed_case, new in aliases:
             fp.write(mixed_case + " = " + new + '\n')
+            fp.write(new + '\n')
 
 if __name__=='__main__':
 
