@@ -101,6 +101,9 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     # linked rather than being dynamically linked.  We want a static link so that the shared
     # library can be distributed to users without gfortran
     set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -L. ")
+
+    # Do not set RPATH for OSX
+    SET(CMAKE_MACOSX_RPATH OFF)
   endif()
 
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
@@ -115,8 +118,11 @@ else ()
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif()
 
-# TODO: set to either REFPROP or REFPRP64
-set(NAME "REFPRP64")
+if (UNIX)
+  set(NAME "refprop")
+else ()
+  set(NAME "REFPRP64")
+endif()
 
 # Collect the source files
 file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
