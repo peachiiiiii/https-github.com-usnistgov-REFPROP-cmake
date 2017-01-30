@@ -11,11 +11,19 @@ enable_language(Fortran)
 # to suit, or just leave as defaults. #
 #######################################
 
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/fortran")
+    set (FORTRAN_PATH "fortran")
+else()
+    set (FORTRAN_PATH "FORTRAN")
+endif()
+
 SET (REFPROP_FORTRAN_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/FORTRAN"
+        "${CMAKE_CURRENT_SOURCE_DIR}/${FORTRAN_PATH}"
         CACHE STRING
         "The path to the directory of the FORTRAN source files")
-                         
+
+
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE RELEASE CACHE STRING
