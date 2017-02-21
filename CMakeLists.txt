@@ -11,11 +11,19 @@ enable_language(Fortran)
 # to suit, or just leave as defaults. #
 #######################################
 
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/fortran")
+    set (FORTRAN_PATH "fortran")
+else()
+    set (FORTRAN_PATH "FORTRAN")
+endif()
+
 SET (REFPROP_FORTRAN_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/FORTRAN"
+        "${CMAKE_CURRENT_SOURCE_DIR}/${FORTRAN_PATH}"
         CACHE STRING
         "The path to the directory of the FORTRAN source files")
-                         
+
+
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE RELEASE CACHE STRING
@@ -101,6 +109,9 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     # linked rather than being dynamically linked.  We want a static link so that the shared
     # library can be distributed to users without gfortran
     set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -L. ")
+
+    # Do not set RPATH for OSX
+    SET(CMAKE_MACOSX_RPATH OFF)
   endif()
 
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
@@ -115,8 +126,11 @@ else ()
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif()
 
-# TODO: set to either REFPROP or REFPRP64
-set(NAME "REFPRP64")
+if (UNIX)
+  set(NAME "refprop")
+else ()
+  set(NAME "REFPRP64")
+endif()
 
 # Collect the source files
 file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
