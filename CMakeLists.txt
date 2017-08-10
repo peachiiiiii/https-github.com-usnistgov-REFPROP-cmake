@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (REFPROP)
 enable_language(Fortran)
 
+
+find_package (PythonInterp)
+
 #######################################
 #           BUILD OPTIONS             #
 #-------------------------------------#
@@ -68,7 +71,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     set(DEFSYM_FLAG "--using-defsym")
   endif()
   message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
-  set(BUILD_COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
+  set(BUILD_COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
   # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are export to DLL
   if (MINGW)
     set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
@@ -201,5 +204,5 @@ set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${RE
 # Build the REFPROP.h header file to go with this shared library
 add_custom_command(TARGET ${NAME}
                    PRE_BUILD
-                   COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}"
+                   COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}"
                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
