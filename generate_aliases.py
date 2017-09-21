@@ -8,13 +8,13 @@ def tokenize(path_to_REFPROP_lib_h, path_to_FORTRAN):
     symbols
     """
     import re
-    a = re.compile(r"""^[^cC]      # string must not start with comment character (c or C)
+    a = re.compile(r"""^[^cC]     # string must not start with comment character (c or C)
                        \s+        # match as many spaces as you like
                        subroutine # ...
-                       \s+          # one whitespace character
-                       (.+)       # THE THING WE ARE CAPTURING
-                       \s+         # one or more whitespace character
-                       \(          # the opening (
+                       \s+        # one or more whitespace character
+                       (\w+)      # THE THING WE ARE CAPTURING
+                       \s*        # zero or more whitespace character
+                       \(*        # zero or more opening parentheses
                        """, re.VERBOSE)
 	
     PASS_CMN_tokens = []
