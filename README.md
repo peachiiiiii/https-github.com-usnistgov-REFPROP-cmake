@@ -102,15 +102,19 @@ cmake --build .
 ```
 That's it!
 
-or all in a tidy batch file that clones the repo, does the build, and cleans up after itself:
+Or, all in a tidy batch file that clones the repo, does the build, and cleans up after itself... 
 
+You will want to save these contents in a ``.bat`` file and run it from the command prompt:
 ```
+REM --- THESE ARE THE PATHS YOU MAY NEED MODIFY ---
 set PATH=D:\Software\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev0\mingw64\bin;%PATH%
+set FORTRAN_PATH=R:/FORTRAN
+
 git clone --recursive https://github.com/usnistgov/REFPROP-cmake
 cd REFPROP-cmake
 mkdir build
 cd build
-cmake .. -DREFPROP_FORTRAN_PATH=R:/FORTRAN -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
+cmake .. -DREFPROP_FORTRAN_PATH=%FORTRAN_PATH% -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 cd ../..
 copy REFPROP-cmake\build\REFPRP64.DLL .
