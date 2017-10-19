@@ -50,10 +50,15 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   if (REFPROP_32BIT)
     message(STATUS "Forcing 32-bit build and passing -m32 to compiler...")
     set(ARCH_FLAG "-m32")
+  else()
+    if (REFPROP_64BIT)
+      message(STATUS "Forcing 64-bit build and passing -m64 to compiler...")
+      set(ARCH_FLAG "-m64")
+    endif()
   endif()
 
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 ${ARCH_FLAG}")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -static -static-libgfortran -static-libgcc ${ARCH_FLAG}")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g ${ARCH_FLAG}")
   
   # Now we need to determine whether gfortran uses --defsym or -alias to 
@@ -98,7 +103,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # insistent that it wants a dynamically linked libquadmath.  See also this open bug
   # for gfortran: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=46539
   # For Mac systems
-  if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+  if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin" OR MINGW)
     execute_process(COMMAND gfortran ${ARCH_FLAG} -print-file-name=libquadmath.a
                     RESULT_VARIABLE LIBQUADMATH_CHECK_RESULT
                     OUTPUT_VARIABLE LIBQUADMATH_CHECK_OUTPUT
