@@ -15,9 +15,10 @@ Public domain, (though REFPROP itself is not public domain)
 
 ## Pre-Requisites
 
-* Python
+* Python + numpy
 * A fortran compiler
 * Cmake
+* git
 
 ## Instructions
 
@@ -58,3 +59,60 @@ Once the shared library has been build, you will need to place it somewhere that
   When building with a Visual Studio generator, you will want to ensure that you get a Release build, which is ensured by passing the flag ``--config Release`` to the build command, something like:
 
     ``cmake --build . --config Release``
+
+## Instructions for MINGW builds on windows
+
+It is possible to use a fully open-source build system on windows to compile REFPROP.  This is enabled by the use of the MINGW compiler system.
+
+To get started from a clean windows installation, you will need:
+* [cmake](https://cmake.org/download/)
+* [MINGW](https://sourceforge.net/projects/mingw-w64/files/latest/download) (make sure to install the gfortran compiler)
+* [miniconda](https://conda.io/miniconda.html):  This installs a minimal python setup, along with with the ``conda`` package manager (use the 64-bit python 3.6 one). Once it is installed, install numpy with : ``conda install numpy`` at the command line
+* [git](https://git-scm.com/download/win)
+
+Then to set up your shell, at the command prompt do:
+```
+set PATH=D:\Software\mingw\bin;%PATH%
+```
+or put the path to wherever the MINGW compiler has been installed.
+
+Check out the git sources with:
+```
+git clone --recursive https://github.com/usnistgov/REFPROP-cmake
+```
+Move into that directory:
+```
+cd REFPROP-cmake
+```
+Make a working directory
+```
+mkdir build
+```
+Move into that directory
+```
+cd build
+```
+Configure the build system
+```
+cmake .. -DREFPROP_FORTRAN_PATH=R:/FORTRAN -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
+```
+and build the DLL
+```
+cmake --build .
+```
+That's it!
+
+or all in a tidy batch file that clones the repo, does the build, and cleans up after itself:
+
+```
+set PATH=D:\Software\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev0\mingw64\bin;%PATH%
+git clone --recursive https://github.com/usnistgov/REFPROP-cmake
+cd REFPROP-cmake
+mkdir build
+cd build
+cmake .. -DREFPROP_FORTRAN_PATH=R:/FORTRAN -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+cd ../..
+copy REFPROP-cmake\build\REFPRP64.DLL .
+rmdir /Q /S REFPROP-cmake
+```
