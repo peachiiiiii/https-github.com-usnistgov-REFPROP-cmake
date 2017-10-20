@@ -62,8 +62,8 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g ${ARCH_FLAG}")
 
   if(MINGW)
-    set(CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE} -mrtd)
-    set(CMAKE_Fortran_FLAGS_DEBUG ${CMAKE_Fortran_FLAGS_DEBUG} -mrtd)
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -mrtd")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -mrtd")
   endif()
   
   # Now we need to determine whether gfortran uses --defsym or -alias to 
