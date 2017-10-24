@@ -15,7 +15,7 @@ Public domain, (though REFPROP itself is not public domain)
 
 ## Pre-Requisites
 
-* Python + numpy
+* Python + numpy (make sure that this prints something reasonable at the command prompt ``python -c "import numpy as np; print(np.__version__)"``)
 * A fortran compiler
 * Cmake
 * git
