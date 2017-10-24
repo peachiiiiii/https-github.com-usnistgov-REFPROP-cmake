@@ -65,9 +65,9 @@ Once the shared library has been build, you will need to place it somewhere that
 It is possible to use a fully open-source build system on windows to compile REFPROP.  This is enabled by the use of the MINGW compiler system.
 
 To get started from a clean windows installation, you will need:
-* [cmake](https://cmake.org/download/)
-* [MINGW](https://sourceforge.net/projects/mingw-w64/files/latest/download) (make sure to install the gfortran compiler)
-* [miniconda](https://conda.io/miniconda.html):  This installs a minimal python setup, along with with the ``conda`` package manager (use the 64-bit python 3.6 one). Once it is installed, install numpy with : ``conda install numpy`` at the command line
+* [cmake](https://cmake.org/download/): When you install, it is recommended to add the install directory to the ``PATH`` system variable
+* [MINGW](https://sourceforge.net/projects/mingw-w64/files/latest/download): You may want to run the installer twice, the first time selecting the ``i686`` architecture (for 32-bit compilation), and the second time, selecting the ``x86_64`` architecture (for 64-bit compilation)
+* [miniconda](https://conda.io/miniconda.html):  This installs a minimal python setup, along with with the ``conda`` package manager (use the 64-bit python 3.6 one).  You probably want to add conda and python to the system PATH variable when asked in the installer. Once it is installed, install numpy with : ``conda install numpy`` at the command line.  If you require administrative rights to install to the default Anaconda installation location, open an administrative shell by typing ``cmd`` in the windows start menu search, right-clicking on cmd.exe, and selecting "Run as Administrator"
 * [git](https://git-scm.com/download/win)
 
 Then to set up your shell, at the command prompt do:
@@ -94,7 +94,7 @@ cd build
 ```
 Configure the build system
 ```
-cmake .. -DREFPROP_FORTRAN_PATH=R:/FORTRAN -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
+cmake .. -DREFPROP_FORTRAN_PATH=R:/FORTRAN -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 ```
 and build the DLL
 ```
@@ -104,19 +104,56 @@ That's it!
 
 Or, all in a tidy batch file that clones the repo, does the build, and cleans up after itself... 
 
-You will want to save these contents in a ``.bat`` file and run it from the command prompt:
+You will want to save these contents in a ``.bat`` file and run it from the command prompt, passing it ``32`` for a 32-bit build generating REFPROP.DLL, or ``64`` for a 64-bit build, generating the ``REFPRP64.DLL`` file.
+
+Here is the contents of ``build_dll.bat``
 ```
+@echo off
+
+REM Call this script like: build_dll.bat 32
+REM for a 32-bit build, or build_dll.bat 64 for a 64-bit build
+
 REM --- THESE ARE THE PATHS YOU MAY NEED MODIFY ---
-set PATH=D:\Software\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev0\mingw64\bin;%PATH%
+set PATH_32BIT=D:\Software\mingw-w64\i686-7.2.0-posix-dwarf-rt_v5-rev0\mingw32\bin
+set PATH_64BIT=D:\Software\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev0\mingw64\bin
 set FORTRAN_PATH=R:/FORTRAN
+
+REM --------- You should not need to touch anything below this line ------------
+
+@setlocal enabledelayedexpansion
+
+if "%1" == "64" (
+    set MINGW_PATH=%PATH_64BIT%
+    set BITNESS=64
+) 
+if "%1" == "32" (
+    set MINGW_PATH=%PATH_32BIT%
+    set BITNESS=32
+) 
+if "%MINGW_PATH%" == "" (
+    echo An invalid bitness was selected, valid values are "64" or "32"
+    pause
+    exit /b
+)
+if not exist "%MINGW_PATH%" (
+    echo The path to MINGW bin folder is invalid
+    pause
+    exit /b
+)
+set "PATH=%MINGW_PATH%;%PATH%"
 
 git clone --recursive https://github.com/usnistgov/REFPROP-cmake
 cd REFPROP-cmake
 mkdir build
 cd build
-cmake .. -DREFPROP_FORTRAN_PATH=%FORTRAN_PATH% -G "MinGW Makefiles" -DREFPROP_64BIT=ON -DCMAKE_BUILD_TYPE=Release
+cmake .. -DREFPROP_FORTRAN_PATH=%FORTRAN_PATH% -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 cd ../..
-copy REFPROP-cmake\build\REFPRP64.DLL .
+if "%BITNESS%" == "32" (
+    copy REFPROP-cmake\build\REFPRP64.DLL REFPROP.DLL
+)
+if "%BITNESS%" == "64" (
+    copy REFPROP-cmake\build\REFPRP64.DLL REFPRP64.DLL
+)
 rmdir /Q /S REFPROP-cmake
 ```
