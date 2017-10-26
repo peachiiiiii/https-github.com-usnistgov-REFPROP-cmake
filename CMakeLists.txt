@@ -219,5 +219,5 @@ set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${RE
 # Build the REFPROP.h header file to go with this shared library
 add_custom_command(TARGET ${NAME}
                    PRE_BUILD
-                   COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}"
+                   COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
