@@ -58,7 +58,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   endif()
 
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -static -static-libgfortran -static-libgcc ${ARCH_FLAG}")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 ${ARCH_FLAG}")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g ${ARCH_FLAG}")
 
   # if(MINGW)
