@@ -14,7 +14,6 @@ find_package (PythonInterp)
 # to suit, or just leave as defaults. #
 #######################################
 
-
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/fortran")
     set (FORTRAN_PATH "fortran")
 else()
@@ -26,6 +25,24 @@ SET (REFPROP_FORTRAN_PATH
         CACHE STRING
         "The path to the directory of the FORTRAN source files")
 
+# Determine the name of the shared library we are going to produce
+# On windows, the name depends on the bitness, on linux/OSX it is always refprop
+if (UNIX)
+  set(NAME "refprop")
+else ()
+  if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+    SET(NAME "REFPRP64")
+  else()
+    SET(NAME "REFPROP")
+  endif()
+  # Handle the bitness forcing for gfortran
+  if ("${ARCH_FLAG}" MATCHES "-m32")
+    SET(NAME "REFPROP")
+  endif()
+  if ("${ARCH_FLAG}" MATCHES "-m64")
+    SET(NAME "REFPRP64")
+  endif()
+endif()
 
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
@@ -142,12 +159,6 @@ else ()
   message ("No optimized Fortran compiler flags are known, we just try -O2...")
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
-endif()
-
-if (UNIX)
-  set(NAME "refprop")
-else ()
-  set(NAME "REFPRP64")
 endif()
 
 # Collect the source files from the specifed location
