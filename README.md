@@ -150,7 +150,7 @@ cmake .. -DREFPROP_FORTRAN_PATH=%FORTRAN_PATH% -G "MinGW Makefiles" -DCMAKE_BUIL
 cmake --build .
 cd ../..
 if "%BITNESS%" == "32" (
-    copy REFPROP-cmake\build\REFPRP64.DLL REFPROP.DLL
+    copy REFPROP-cmake\build\REFPROP.DLL REFPROP.DLL
 )
 if "%BITNESS%" == "64" (
     copy REFPROP-cmake\build\REFPRP64.DLL REFPRP64.DLL
