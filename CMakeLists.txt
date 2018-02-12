@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 2.8)
 project (REFPROP)
 enable_language(Fortran)
 
-
 find_package (PythonInterp)
 
 #######################################
@@ -232,7 +231,7 @@ endforeach()
 # Add the .DEF file if needed
 list(APPEND APP_SOURCES "${DEF_FILE}")
 
-add_library(${NAME} SHARED ${APP_SOURCES})
+add_library(${NAME} SHARED ${APP_SOURCES} )
 
 if (WIN32)
   # Don't add a 'lib' prefix to the shared library if windows
@@ -242,7 +241,25 @@ endif()
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
 
 # Build the REFPROP.h header file to go with this shared library
-add_custom_command(OUTPUT "REFPROP.h"
-                   DEPENDS "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
-                   COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
-                   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+# See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
+# or other places on the internet...
+add_custom_command(
+  OUTPUT 
+    REFPROP.h.stamp
+  DEPENDS 
+    "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
+  COMMENT 
+    "About to build the REFPROP.h header file"
+  COMMAND 
+    ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+  COMMAND
+    cmake -E touch REFPROP.h.stamp
+  WORKING_DIRECTORY 
+    "${CMAKE_CURRENT_BINARY_DIR}"
+  )
+
+add_custom_target(REFPROP_H 
+                  ALL 
+                  DEPENDS 
+                    REFPROP.h.stamp
+                  )
