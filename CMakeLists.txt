@@ -159,9 +159,14 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   endif()
 
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
-  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads /libs:static /MT")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od /libs:static /MT")
+  if (REFPROP_DYNAMIC_RUNTIME)
+    set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads")
+    set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od")
+  else()  
+    # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
+    set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads /libs:static /MT")
+    set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od /libs:static /MT")
+  endif()
 else ()
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
