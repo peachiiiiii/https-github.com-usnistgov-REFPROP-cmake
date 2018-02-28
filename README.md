@@ -60,6 +60,8 @@ Once the shared library has been build, you will need to place it somewhere that
 
     ``cmake --build . --config Release``
 
+* If you want to make the Intel runtime dynamically linked into the shared library (this is necessary in order to load hundreds of copies of REFPROP in memory with the REFPROP-manager (see https://github.com/usnistgov/REFPROP-manager)), define the CMake flag ``-DREFPROP_DYNAMIC_RUNTIME=ON``.  The default is to statically link the runtime, which is the right answers for most users and use cases.
+
 ## Instructions for MINGW builds on windows
 
 It is possible to use a fully open-source build system on windows to compile REFPROP.  This is enabled by the use of the MINGW compiler system.
