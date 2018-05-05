@@ -23,11 +23,17 @@ def tokenize(path_to_REFPROP_lib_h, path_to_FORTRAN):
 
     with open(path_to_REFPROP_lib_h, 'r') as fp:
         lines = fp.readlines()
+
+
+    a = re.compile(r"""\s{4}      # match four spaces at beginning of line
+                       X\(        # ...
+                       (\w+)      # THE THING WE ARE CAPTURING
+                       \)         # ...
+                       """, re.VERBOSE)
+
     tokens = []
     for line in lines:
-        if line.strip().startswith('X('):
-            tok = line.rstrip('\\\n').strip().split('X(')[1].strip().rstrip(')')
-            tokens.append(tok)
+        tokens += re.findall(a, line)
 
     print("Missing from PASS_CMN_tokens: ", [t for t in tokens if t not in PASS_CMN_tokens])
     print("Missing from REFPROP_lib.h:", [t for t in PASS_CMN_tokens if t not in tokens])
