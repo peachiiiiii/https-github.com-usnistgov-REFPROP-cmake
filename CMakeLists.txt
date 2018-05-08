@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (REFPROP)
 enable_language(Fortran)
 
-find_package (PythonInterp)
+if (not REFPROP_NO_PYTHON)
+  find_package (PythonInterp)
+endif()
 
 #######################################
 #           BUILD OPTIONS             #
@@ -92,39 +94,45 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #   set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -mrtd")
   # endif()
   
-  # Now we need to determine whether gfortran uses --defsym or -alias to 
-  # define symbol aliases for the linker
-  execute_process(COMMAND gfortran -Wl,--defsym
-                  RESULT_VARIABLE DEFSYM_CHECK_RESULT
-                  OUTPUT_VARIABLE DEFSYM_CHECK_OUTPUT
-                  ERROR_VARIABLE DEFSYM_CHECK_OUTPUT
-                  )
-  # If there is a note in the output about defsym syntax error, 
-  # defsym is the alias keyword, but it didn't understand the argument.
-  # That's good, it means we should use --defsym to define aliases
-  string(FIND "${DEFSYM_CHECK_OUTPUT}" "syntax error" DEFSYM_STR_INDEX) 
-  if (${DEFSYM_STR_INDEX} GREATER 0)
-    set(DEFSYM_FLAG "--using-defsym")
-  endif()
-  message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
-  set(BUILD_COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
-  # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are export to DLL
-  if (MINGW)
-    set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
-    execute_process(COMMAND ${BUILD_COMMAND}
-                    RESULT_VARIABLE GEN_ALIASES_RESULT
-                    OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
-                    ERROR_VARIABLE GEN_ALIASES_OUTPUT
+  if (not REFPROP_NO_PYTHON)
+    # Now we need to determine whether gfortran uses --defsym or -alias to 
+    # define symbol aliases for the linker
+    execute_process(COMMAND gfortran -Wl,--defsym
+                    RESULT_VARIABLE DEFSYM_CHECK_RESULT
+                    OUTPUT_VARIABLE DEFSYM_CHECK_OUTPUT
+                    ERROR_VARIABLE DEFSYM_CHECK_OUTPUT
                     )
-    set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/REFPROP.DEF")
-  else()
-    execute_process(COMMAND ${BUILD_COMMAND}
-                    RESULT_VARIABLE GEN_ALIASES_RESULT
-                    OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
-                    ERROR_VARIABLE GEN_ALIASES_OUTPUT
-                    )
-    message(STATUS "${GEN_ALIASES_OUTPUT}") 
-    file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
+    # If there is a note in the output about defsym syntax error, 
+    # defsym is the alias keyword, but it didn't understand the argument.
+    # That's good, it means we should use --defsym to define aliases
+    string(FIND "${DEFSYM_CHECK_OUTPUT}" "syntax error" DEFSYM_STR_INDEX) 
+    if (${DEFSYM_STR_INDEX} GREATER 0)
+      set(DEFSYM_FLAG "--using-defsym")
+    endif()
+    message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
+
+    # The base command to be used to extract the aliases in a form that the compiler can consume
+    set(BUILD_COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
+    
+    # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are exported to the DLL
+    if (MINGW)
+      set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
+      execute_process(COMMAND ${BUILD_COMMAND}
+                      RESULT_VARIABLE GEN_ALIASES_RESULT
+                      OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
+                      ERROR_VARIABLE GEN_ALIASES_OUTPUT
+                      )
+      set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/REFPROP.DEF")
+    else()
+      execute_process(COMMAND ${BUILD_COMMAND}
+                      RESULT_VARIABLE GEN_ALIASES_RESULT
+                      OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
+                      ERROR_VARIABLE GEN_ALIASES_OUTPUT
+                      )
+      message(STATUS "${GEN_ALIASES_OUTPUT}") 
+      file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
+    endif()
+
   endif()
 
   # Start off with the aliases
@@ -245,26 +253,28 @@ endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
 
-# Build the REFPROP.h header file to go with this shared library
-# See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
-# or other places on the internet...
-add_custom_command(
-  OUTPUT 
-    REFPROP.h.stamp
-  DEPENDS 
-    "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
-  COMMENT 
-    "About to build the REFPROP.h header file"
-  COMMAND 
-    ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
-  COMMAND
-    cmake -E touch REFPROP.h.stamp
-  WORKING_DIRECTORY 
-    "${CMAKE_CURRENT_BINARY_DIR}"
-  )
+if (not REFPROP_NO_PYTHON)
+  # Build the REFPROP.h header file to go with this shared library
+  # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
+  # or other places on the internet...
+  add_custom_command(
+    OUTPUT 
+      REFPROP.h.stamp
+    DEPENDS 
+      "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
+    COMMENT 
+      "About to build the REFPROP.h header file"
+    COMMAND 
+      ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+    COMMAND
+      cmake -E touch REFPROP.h.stamp
+    WORKING_DIRECTORY 
+      "${CMAKE_CURRENT_BINARY_DIR}"
+    )
 
-add_custom_target(REFPROP_H 
-                  ALL 
-                  DEPENDS 
-                    REFPROP.h.stamp
-                  )
+  add_custom_target(REFPROP_H 
+                    ALL 
+                    DEPENDS 
+                      REFPROP.h.stamp
+                    )
+endif()
