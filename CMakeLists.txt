@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (REFPROP)
 enable_language(Fortran)
 
-if (not REFPROP_NO_PYTHON)
+if (NOT REFPROP_NO_PYTHON)
   find_package (PythonInterp)
 endif()
 
@@ -94,7 +94,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #   set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -mrtd")
   # endif()
   
-  if (not REFPROP_NO_PYTHON)
+  if (NOT REFPROP_NO_PYTHON)
     # Now we need to determine whether gfortran uses --defsym or -alias to 
     # define symbol aliases for the linker
     execute_process(COMMAND gfortran -Wl,--defsym
@@ -253,7 +253,7 @@ endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
 
-if (not REFPROP_NO_PYTHON)
+if (NOT REFPROP_NO_PYTHON)
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
