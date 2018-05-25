@@ -30,6 +30,10 @@ SET (REFPROP_FORTRAN_PATH
 		""
 		CACHE STRING
 		"Additional link flags for linking the library")
+SET (REFPROP_GCOV
+     FALSE
+     CACHE BOOL
+     "Add the flags to support gcov code coverage")
 
 	SET (REFPROP_SOURCE_AUTOFIX
 		TRUE
@@ -164,6 +168,12 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
     # Do not set RPATH for OSX
     SET(CMAKE_MACOSX_RPATH OFF)
+  endif()
+
+  if (REFPROP_GCOV)
+    message(STATUS "Adding debug flags to enable gcov code coverage...")
+    set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -O0 -pg")
+    set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO} -fprofile-arcs -ftest-coverage -O0 -pg")
   endif()
 
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
