@@ -22,23 +22,24 @@ else()
 endif()
 
 SET (REFPROP_FORTRAN_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/${FORTRAN_PATH}"
-        CACHE STRING
-        "The path to the directory of the FORTRAN source files")
+     "${CMAKE_CURRENT_SOURCE_DIR}/${FORTRAN_PATH}"
+     CACHE STRING
+     "The path to the directory of the FORTRAN source files")
 
-	SET (REFPROP_ADDITIONAL_LINK_FLAGS
-		""
-		CACHE STRING
-		"Additional link flags for linking the library")
 SET (REFPROP_GCOV
      FALSE
      CACHE BOOL
      "Add the flags to support gcov code coverage")
 
-	SET (REFPROP_SOURCE_AUTOFIX
-		TRUE
-		CACHE BOOL
-		"Automatically fix REFPROP 9.1.0 case sensitivity filenames")
+SET (REFPROP_ADDITIONAL_LINK_FLAGS
+  ""
+  CACHE STRING
+  "Additional link flags for linking the library")
+
+SET (REFPROP_SOURCE_AUTOFIX
+  TRUE
+  CACHE BOOL
+  "Automatically fix REFPROP 9.1.0 case sensitivity filenames")
 
 # Determine the name of the shared library we are going to produce
 # On windows, the name depends on the bitness, on linux/OSX it is always refprop
@@ -97,27 +98,27 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #   set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -mrtd")
   #   set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -mrtd")
   # endif()
-  
+
   if (NOT REFPROP_NO_PYTHON)
-    # Now we need to determine whether gfortran uses --defsym or -alias to 
+    # Now we need to determine whether gfortran uses --defsym or -alias to
     # define symbol aliases for the linker
     execute_process(COMMAND gfortran -Wl,--defsym
                     RESULT_VARIABLE DEFSYM_CHECK_RESULT
                     OUTPUT_VARIABLE DEFSYM_CHECK_OUTPUT
                     ERROR_VARIABLE DEFSYM_CHECK_OUTPUT
                     )
-    # If there is a note in the output about defsym syntax error, 
+    # If there is a note in the output about defsym syntax error,
     # defsym is the alias keyword, but it didn't understand the argument.
     # That's good, it means we should use --defsym to define aliases
-    string(FIND "${DEFSYM_CHECK_OUTPUT}" "syntax error" DEFSYM_STR_INDEX) 
+    string(FIND "${DEFSYM_CHECK_OUTPUT}" "syntax error" DEFSYM_STR_INDEX)
     if (${DEFSYM_STR_INDEX} GREATER 0)
       set(DEFSYM_FLAG "--using-defsym")
     endif()
-    message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}") 
+    message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}")
 
     # The base command to be used to extract the aliases in a form that the compiler can consume
     set(BUILD_COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
-    
+
     # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are exported to the DLL
     if (MINGW)
       set(BUILD_COMMAND ${BUILD_COMMAND} --DEF-file REFPROP.DEF)
@@ -133,7 +134,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
                       OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
                       ERROR_VARIABLE GEN_ALIASES_OUTPUT
                       )
-      message(STATUS "${GEN_ALIASES_OUTPUT}") 
+      message(STATUS "${GEN_ALIASES_OUTPUT}")
       file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
     endif()
 
@@ -154,7 +155,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
                     )
     string(STRIP ${LIBQUADMATH_CHECK_OUTPUT} LIBQUADMATH_PATH)
     message(STATUS "Path to libquadmath.a:" "${LIBQUADMATH_PATH}")
-    file(COPY ${LIBQUADMATH_PATH} 
+    file(COPY ${LIBQUADMATH_PATH}
          DESTINATION .)
     message(STATUS "Copied libquadmath.a here.")
 
@@ -180,7 +181,7 @@ elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   if (REFPROP_DYNAMIC_RUNTIME)
     set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads")
     set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od")
-  else()  
+  else()
     # Force visual studio to statically link the c runtime to avoid dependency on MSVCRXXX.dll
     set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 /threads /libs:static /MT")
     set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -debug:full -Od /libs:static /MT")
@@ -198,7 +199,7 @@ file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
 
 if(${REFPROP_SOURCE_AUTOFIX})
 
-  # Check if any of the source files include the statement "include 'commons.for'"; 
+  # Check if any of the source files include the statement "include 'commons.for'";
   # this indicates the use of REFPROP 9.1 or earlier, which has a case-sensitivity problem
   # on non-windows systems with the includes that needs to be repaired
   set(FIX_91 OFF)
@@ -210,19 +211,19 @@ if(${REFPROP_SOURCE_AUTOFIX})
       break()
     endif()
   endforeach()
-  
+
   if (FIX_91 AND (NOT FIX_91_COMPLETE))
-  
+
     message(STATUS "REFPROP version <= 9.1 identified by presence of include \"'commons.for'\"; copying locally and fixing include statement")
-  
+
     # Copy each of the files into a temporary directory within the build directory
     foreach (source ${APP_SOURCES})
       FILE(COPY ${source} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
     endforeach()
-  
+
     # Collect the source files from the containing directory
     file(GLOB APP_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp/*.FOR")
-  
+
     # Do some munging of the FORTRAN files for version 9.1.0 to fix case sensitivity
     # of some of the include statements
     foreach (source ${APP_SOURCES})
@@ -231,14 +232,14 @@ if(${REFPROP_SOURCE_AUTOFIX})
       string(REPLACE "include 'comtrn.for'" "include 'COMTRN.FOR'" CONTENTS ${CONTENTS})
       FILE(WRITE ${source} ${CONTENTS})
     endforeach()
-  
+
     message(STATUS "Fixing of FORTRAN files complete. Compilation ready.")
-  
+
     set(FIX_91_COMPLETE ON CACHE BOOL "Done fixing fortran files")
   endif()
 
 endif(${REFPROP_SOURCE_AUTOFIX})
-  
+
 # Remove the files COMMONS.FOR and COMTRN.FOR from the list of files to be compiled for REFPROP < 9.1.1
 foreach (source ${APP_SOURCES})
   string(FIND "${source}" "COMMONS.FOR" found_INDEX)
@@ -268,23 +269,23 @@ if (NOT REFPROP_NO_PYTHON)
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
   add_custom_command(
-    OUTPUT 
+    OUTPUT
       REFPROP.h.stamp
-    DEPENDS 
+    DEPENDS
       "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
-    COMMENT 
+    COMMENT
       "About to build the REFPROP.h header file"
-    COMMAND 
+    COMMAND
       ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
       cmake -E touch REFPROP.h.stamp
-    WORKING_DIRECTORY 
+    WORKING_DIRECTORY
       "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
-  add_custom_target(REFPROP_H 
-                    ALL 
-                    DEPENDS 
+  add_custom_target(REFPROP_H
+                    ALL
+                    DEPENDS
                       REFPROP.h.stamp
                     )
 endif()
