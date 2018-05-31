@@ -41,6 +41,16 @@ SET (REFPROP_SOURCE_AUTOFIX
   CACHE BOOL
   "Automatically fix REFPROP 9.1.0 case sensitivity filenames")
 
+SET (REFPROP_NO_NUMPY
+  FALSE
+  CACHE BOOL
+  "Disable use of numpy to generate C/C++ header")
+
+SET (REFPROP_NO_PYTHON
+  FALSE
+  CACHE BOOL
+  "Disable all use of Python")
+
 # Determine the name of the shared library we are going to produce
 # On windows, the name depends on the bitness, on linux/OSX it is always refprop
 if (UNIX)
@@ -264,7 +274,7 @@ endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
 
-if (NOT REFPROP_NO_PYTHON)
+if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...

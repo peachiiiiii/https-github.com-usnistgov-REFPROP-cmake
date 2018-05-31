@@ -15,7 +15,7 @@ Public domain, (though REFPROP itself is not public domain)
 
 ## Pre-Requisites
 
-* Python + numpy (make sure that this prints something reasonable at the command prompt: ``python -c "import numpy; print(numpy.__version__)"``).  See below about disabling the use of Python
+* Python + numpy (make sure that this prints something reasonable at the command prompt: ``python -c "import numpy; print(numpy.__version__)"``).  See below about disabling the use of Python and/or numpy
 * A fortran compiler
 * Cmake
 * git
@@ -54,11 +54,13 @@ Once the shared library has been build, you will need to place it somewhere that
 
     ``python -m numpy.f2py -c "import numpy"``
 
-  then you can disable all use of Python by passing the command line flag ``REFPROP_NO_PYTHON``
+  then you can disable all use of numpy by passing the command line flag ``REFPROP_NO_NUMPY``
 
-    ``cmake .. -DREFPROP_NO_PYTHON=ON``
+    ``cmake .. -DREFPROP_NO_NUMPY=ON``
 
-  This will disable the alias generation, so the only symbols that will be exported will be the default symbols for your compiler, which could be a problem.  Also, disabling support for Python will result in the header not being generated.  It is highly recommended to find a working numpy version.
+  which will result in the C/C++ header not being generated.  It is highly recommended to find a working numpy version.
+
+  If you absolutely cannot get access to Python, you can also define ``REFPROP_NO_PYTHON``, which will disable all use of Python, but this will disable the alias generation, so the only symbols that will be exported will be the default symbols for your compiler, which could be a problem for non-Intel compilers.  
 
 * On windows, if you want to use Intel Fortran + Visual Studio, you can change the generator, with something like:
 
