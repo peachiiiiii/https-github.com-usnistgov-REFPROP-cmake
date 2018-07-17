@@ -127,7 +127,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}")
 
     # The base command to be used to extract the aliases in a form that the compiler can consume
-    set(BUILD_COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
+    set(BUILD_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
 
     # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are exported to the DLL
     if (MINGW)
@@ -286,7 +286,7 @@ if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
     COMMENT
       "About to build the REFPROP.h header file"
     COMMAND
-      ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+      ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
       cmake -E touch REFPROP.h.stamp
     WORKING_DIRECTORY
