@@ -287,7 +287,7 @@ if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
     DEPENDS
       "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
     COMMENT
-      "About to build the REFPROP.h header file w/" + ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+      "About to build the REFPROP.h header file w/" ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
       ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
