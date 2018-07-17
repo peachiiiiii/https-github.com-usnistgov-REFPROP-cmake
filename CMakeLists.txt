@@ -245,6 +245,9 @@ if(${REFPROP_SOURCE_AUTOFIX})
 
     message(STATUS "Fixing of FORTRAN files complete. Compilation ready.")
 
+    set(REFPROP_FORTRAN_PATH "${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
+    message(STATUS "Set REFPROP_FORTRAN_PATH to ${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
+
     set(FIX_91_COMPLETE ON CACHE BOOL "Done fixing fortran files")
   endif()
 
@@ -284,7 +287,7 @@ if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
     DEPENDS
       "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
     COMMENT
-      "About to build the REFPROP.h header file"
+      "About to build the REFPROP.h header file w/" + ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
       ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
     COMMAND
