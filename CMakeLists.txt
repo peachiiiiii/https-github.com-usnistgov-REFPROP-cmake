@@ -281,15 +281,16 @@ if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
+  set(HEADER_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}")
   add_custom_command(
     OUTPUT
       REFPROP.h.stamp
     DEPENDS
       "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR"
     COMMENT
-      "About to build the REFPROP.h header file w/" ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+      "About to build the REFPROP.h header file w/ ${HEADER_COMMAND}"
     COMMAND
-      ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}"
+      ${HEADER_COMMAND}
     COMMAND
       cmake -E touch REFPROP.h.stamp
     WORKING_DIRECTORY
