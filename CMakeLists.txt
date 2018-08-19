@@ -206,6 +206,11 @@ endif()
 
 # Collect the source files from the specifed location
 file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
+# If the PASS_FTN.FOR is in the DLLFILES subfolder, add it too
+set(PASS_FTN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
+if (EXISTS "${PASS_FTN_PATH}")
+  list(APPEND APP_SOURCES "${PASS_FTN_PATH}")
+endif
 
 if(${REFPROP_SOURCE_AUTOFIX})
 
