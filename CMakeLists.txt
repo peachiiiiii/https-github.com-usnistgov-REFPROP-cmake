@@ -210,7 +210,7 @@ file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
 set(PASS_FTN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
 if (EXISTS "${PASS_FTN_PATH}")
   list(APPEND APP_SOURCES "${PASS_FTN_PATH}")
-endif
+endif()
 
 if(${REFPROP_SOURCE_AUTOFIX})
 
@@ -281,12 +281,17 @@ if (WIN32)
 endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
+target_include_directories(${NAME} PUBLIC "${REFPROP_FORTRAN_PATH}")
 
 if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
-  set(HEADER_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}")
+  set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_PATH}")
+  if (EXISTS "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
+    set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES")
+  endif()
+  set(HEADER_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${HEADER_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}")
   add_custom_command(
     OUTPUT
       REFPROP.h.stamp
