@@ -15,7 +15,9 @@ Public domain, (though REFPROP itself is not public domain)
 
 ## Pre-Requisites
 
-* Python + numpy (make sure that this prints something reasonable at the command prompt: ``python -c "import numpy; print(numpy.__version__)"``).  See below about disabling the use of Python and/or numpy
+* Python (See below about disabling the use of Python)
+    * ``six``  (Often packaged automatically (e.g., with Anaconda), or you can pip install it at the command prompt: ``pip install six``)
+    * ``numpy`` (make sure that this prints something reasonable at the command prompt: ``python -c "import numpy; print(numpy.__version__)"``).  See below about disabling the use of numpy
 * A fortran compiler
 * Cmake
 * git
