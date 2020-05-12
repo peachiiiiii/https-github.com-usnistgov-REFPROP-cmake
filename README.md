@@ -42,6 +42,14 @@ Once the shared library has been build, you will need to place it somewhere that
 
 * On OSX, it seems you need to use the ``homebrew`` version of ``gcc`` and ``gfortran``.  You can obtain homebrew versions of gcc and gfortran with ``brew install gcc`` once homebrew is installed
 
+* On OSX, ``cmake --build .`` with homebrewed python and vanilla system python both installed fails because ``find_package(PythonInterp)``, called by ``cmake .. -DCMAKE_BUILD_TYPE=Release``, picks up the system python rather than the brewed python, as evident from an examination of ``CMakeCache.txt`` and ``build.make``.
+
+The solution is to force cmake to use the brewed python:
+
+```
+cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/usr/local/bin/python3
+```
+
 ## General Notes
 
 * Platforms other than windows (and sort of OSX) are CASE-SENSITIVE!  The folder ``fortran`` is not the same as ``FORTRAN``
