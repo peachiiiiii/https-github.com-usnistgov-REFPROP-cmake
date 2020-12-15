@@ -90,7 +90,7 @@ It is possible to use a fully open-source build system on windows to compile REF
 
 To get started from a clean windows installation, you will need:
 * [cmake](https://cmake.org/download/): When you install, it is recommended to add the install directory to the ``PATH`` system variable
-* [MINGW](https://sourceforge.net/projects/mingw-w64/files/latest/download): You may want to run the installer twice, the first time selecting the ``i686`` architecture (for 32-bit compilation), and the second time, selecting the ``x86_64`` architecture (for 64-bit compilation)
+* [MINGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe): You may want to run the installer twice, the first time selecting the ``i686`` architecture (for 32-bit compilation), and the second time, selecting the ``x86_64`` architecture (for 64-bit compilation)
 * [miniconda](https://conda.io/miniconda.html):  This installs a minimal python setup, along with with the ``conda`` package manager (use the 64-bit python 3.6 one).  You probably want to add conda and python to the system PATH variable when asked in the installer. Once it is installed, install numpy with : ``conda install numpy`` at the command line.  If you require administrative rights to install to the default Anaconda installation location, open an administrative shell by typing ``cmd`` in the windows start menu search, right-clicking on cmd.exe, and selecting "Run as Administrator"
 * [git](https://git-scm.com/download/win)
 
