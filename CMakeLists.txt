@@ -209,6 +209,9 @@ file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
 # If the PASS_FTN.FOR is in the DLLFILES subfolder, add it too
 set(PASS_FTN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
 if (EXISTS "${PASS_FTN_PATH}")
+  if (EXISTS "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR")
+    message(FATAL_ERROR "PASS_FTN.FOR was found in both the root folder of sources as well as in the DLLFILES subfolder. Please delete one of them and try again.")
+  endif()
   list(APPEND APP_SOURCES "${PASS_FTN_PATH}")
 endif()
 
