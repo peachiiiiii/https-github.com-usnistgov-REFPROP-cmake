@@ -1,6 +1,6 @@
 # REFPROP-cmake
 
-Small repo with CMake build system for building REFPROP shared library
+Small repo with CMake build system for building REFPROP shared library for REFPROP versions 9.1 and newer
 
 Why you should use this build system:
 
@@ -8,6 +8,10 @@ Why you should use this build system:
 * You can easily point the repo at a different version of the REFPROP sources, allowing for building/testing several versions of REFPROP in parallel
 
 Brought to you by Ian Bell, NIST, ian.bell@nist.gov
+
+## Getting help
+
+Open an issue: https://github.com/usnistgov/REFPROP-cmake/issues/new
 
 ## License
 
@@ -137,7 +141,7 @@ Here is the contents of ``build_dll.bat``
 REM Call this script like: build_dll.bat 32
 REM for a 32-bit build, or build_dll.bat 64 for a 64-bit build
 
-REM --- THESE ARE THE PATHS YOU MAY NEED MODIFY ---
+REM --- THESE ARE THE PATHS YOU MAY NEED TO MODIFY ---
 set PATH_32BIT=D:\Software\mingw-w64\i686-7.2.0-posix-dwarf-rt_v5-rev0\mingw32\bin
 set PATH_64BIT=D:\Software\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev0\mingw64\bin
 set FORTRAN_PATH=R:/FORTRAN
