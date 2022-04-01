@@ -40,6 +40,10 @@ Once the shared library has been build, you will need to place it somewhere that
 
 ## OSX Notes
 
+* If you have an M1 chip, the arm64 architecture is not supported. Thus you must use the gfortran from homebrew and build for x86_64 and use Rosetta2 emulation. The flags you want are something like:
+
+    ``cmake .. -DCMAKE_FORTRAN_COMPILER=/path/to/gfortran -DREFPROP_X8664=ON``
+
 * If you want to force a 32-bit build (I'm looking at you Excel 2016 on Mac), you can do:
 
     ``cmake .. -DREFPROP_32BIT=ON``
