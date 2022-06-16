@@ -18,6 +18,6 @@ docker run -it -v"$(CWD)":/shared  -t rpub18 bash
 Then inside the container:
 ```
 cd /REFPROP-cmake/build
-cmake -DREFPROP_FORTRAN_PATH=/shared/RP10src
+cmake .. -DREFPROP_FORTRAN_PATH=/shared/RP10src
 cmake --build .
 ```
