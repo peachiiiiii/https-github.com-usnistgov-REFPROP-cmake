@@ -151,9 +151,12 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
       execute_process(COMMAND ${BUILD_COMMAND}
                       RESULT_VARIABLE GEN_ALIASES_RESULT
                       OUTPUT_VARIABLE GEN_ALIASES_OUTPUT
-                      ERROR_VARIABLE GEN_ALIASES_OUTPUT
+                      ERROR_VARIABLE GEN_ALIASES_ERROR
                       )
-      message(STATUS "${GEN_ALIASES_OUTPUT}")
+      if(GEN_ALIASES_RESULT EQUAL "1")
+        message(STATUS "Alias generation output: ${GEN_ALIASES_OUTPUT}")
+        message(STATUS "Alias generation error: ${GEN_ALIASES_ERROR}")
+      endif()
       file(READ "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" ALIASES_STRING)
     endif()
 
