@@ -51,6 +51,10 @@ SET (REFPROP_NO_PYTHON
   CACHE BOOL
   "Disable all use of Python")
 
+
+get_filename_component(REFPROP_FORTRAN_ABS_PATH "${REFPROP_FORTRAN_PATH}"
+                       REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+
 # Determine the name of the shared library we are going to produce
 # On windows, the name depends on the bitness, on linux/OSX it is always refprop
 if (UNIX)
@@ -132,7 +136,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
     message(STATUS "DEFSYM_FLAG: ${DEFSYM_FLAG}")
 
     # The base command to be used to extract the aliases in a form that the compiler can consume
-    set(BUILD_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_PATH}" ${DEFSYM_FLAG})
+    set(BUILD_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/generate_aliases.py" --mangling setupdll_ -O "${CMAKE_CURRENT_BINARY_DIR}/aliases_string.txt" --FORTRAN-path "${REFPROP_FORTRAN_ABS_PATH}" ${DEFSYM_FLAG})
 
     # If mingw, we need to add the DEF file to make sure that the mixed-case symbols are exported to the DLL
     if (MINGW)
@@ -210,14 +214,16 @@ else ()
 endif()
 
 # Collect the source files from the specifed location
-file(GLOB APP_SOURCES "${REFPROP_FORTRAN_PATH}/*.FOR")
+file(GLOB APP_SOURCES "${REFPROP_FORTRAN_ABS_PATH}/*.FOR")
 # If the PASS_FTN.FOR is in the DLLFILES subfolder, add it too
-set(PASS_FTN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
+set(PASS_FTN_PATH "${REFPROP_FORTRAN_ABS_PATH}/DLLFILES/PASS_FTN.FOR")
 if (EXISTS "${PASS_FTN_PATH}")
-  if (EXISTS "${REFPROP_FORTRAN_PATH}/PASS_FTN.FOR")
+  if (EXISTS "${REFPROP_FORTRAN_ABS_PATH}/PASS_FTN.FOR")
     message(FATAL_ERROR "PASS_FTN.FOR was found in both the root folder of sources as well as in the DLLFILES subfolder. Please delete one of them and try again.")
   endif()
-  list(APPEND APP_SOURCES "${PASS_FTN_PATH}")
+  get_filename_component(PASS_FTN_ABS_PATH "${PASS_FTN_PATH}"
+                       REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+  list(APPEND APP_SOURCES "${PASS_FTN_ABS_PATH}")
 endif()
 
 if(${REFPROP_SOURCE_AUTOFIX})
@@ -259,7 +265,9 @@ if(${REFPROP_SOURCE_AUTOFIX})
     message(STATUS "Fixing of FORTRAN files complete. Compilation ready.")
 
     set(REFPROP_FORTRAN_PATH "${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
-    message(STATUS "Set REFPROP_FORTRAN_PATH to ${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
+    get_filename_component(REFPROP_FORTRAN_ABS_PATH "${REFPROP_FORTRAN_PATH}"
+                       REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+    message(STATUS "Set REFPROP_FORTRAN_ABS_PATH to ${CMAKE_CURRENT_BINARY_DIR}/FORTRAN_temp")
 
     set(FIX_91_COMPLETE ON CACHE BOOL "Done fixing fortran files")
   endif()
@@ -289,15 +297,15 @@ if (WIN32)
 endif()
 
 set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${REFPROP_LINK_FLAGS} ${REFPROP_ADDITIONAL_LINK_FLAGS}")
-target_include_directories(${NAME} PUBLIC "${REFPROP_FORTRAN_PATH}")
+target_include_directories(${NAME} PUBLIC "${REFPROP_FORTRAN_ABS_PATH}")
 
 if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
-  set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_PATH}")
-  if (EXISTS "${REFPROP_FORTRAN_PATH}/DLLFILES/PASS_FTN.FOR")
-    set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_PATH}/DLLFILES")
+  set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_ABS_PATH}")
+  if (EXISTS "${REFPROP_FORTRAN_ABS_PATH}/DLLFILES/PASS_FTN.FOR")
+    set(HEADER_FORTRAN_PATH "${REFPROP_FORTRAN_ABS_PATH}/DLLFILES")
   endif()
   set(HEADER_COMMAND ${PYTHON_EXECUTABLE} -u "${CMAKE_CURRENT_SOURCE_DIR}/externals/REFPROP-headers/generate_header.py" --FORTRAN-path "${HEADER_FORTRAN_PATH}" --python-exe "${PYTHON_EXECUTABLE}")
   add_custom_command(
