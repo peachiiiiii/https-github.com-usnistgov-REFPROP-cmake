@@ -51,6 +51,11 @@ SET (REFPROP_NO_PYTHON
   CACHE BOOL
   "Disable all use of Python")
 
+SET (REFPROP_OSX_STATIC_LINK
+  FALSE
+  CACHE BOOL
+  "Statically link the standard libraries")
+
 
 get_filename_component(REFPROP_FORTRAN_ABS_PATH "${REFPROP_FORTRAN_PATH}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
@@ -181,13 +186,16 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
          DESTINATION .)
     message(STATUS "Copied libquadmath.a here.")
 
-    # Now we construct the flags to be passed to linker
-    set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -static -static-libgfortran -static-libgcc ")
+    if (REFPROP_OSX_STATIC_LINK)
 
-    # This, in concert with the libquadmath logic above, ensures that libquadmath is statically
-    # linked rather than being dynamically linked.  We want a static link so that the shared
-    # library can be distributed to users without gfortran
-    set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -L. ")
+      # Now we construct the flags to be passed to linker
+      set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -static -static-libgfortran -static-libgcc ")
+
+      # This, in concert with the libquadmath logic above, ensures that libquadmath is statically
+      # linked rather than being dynamically linked.  We want a static link so that the shared
+      # library can be distributed to users without gfortran
+      set(REFPROP_LINK_FLAGS "${REFPROP_LINK_FLAGS} -L. ")
+    endif()
 
     # Do not set RPATH for OSX
     SET(CMAKE_MACOSX_RPATH OFF)

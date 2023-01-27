@@ -58,6 +58,12 @@ The solution is to force cmake to use the brewed python:
 cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/usr/local/bin/python3
 ```
 
+* If you want statically-linked system libraries, to improve, but not guarantee, that a binary built on one machine will run on another, you can define:
+
+```
+cmake .. -DREFPROP_OSX_STATIC_LINK=ON
+```
+
 ## General Notes
 
 * Platforms other than windows (and sort of OSX) are CASE-SENSITIVE!  The folder ``fortran`` is not the same as ``FORTRAN``
