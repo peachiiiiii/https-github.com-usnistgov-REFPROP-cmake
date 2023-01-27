@@ -124,6 +124,10 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # endif()
 
   if (NOT REFPROP_NO_PYTHON)
+    if (NOT EXISTS ${PYTHON_EXECUTABLE})
+      message(FATAL_ERROR "Specified Python executable does not exist: ${PYTHON_EXECUTABLE}")
+    endif()
+
     # Now we need to determine whether gfortran uses --defsym or -alias to
     # define symbol aliases for the linker
     execute_process(COMMAND gfortran -Wl,--defsym
@@ -311,6 +315,9 @@ set_target_properties(${NAME} PROPERTIES APPEND_STRING PROPERTY LINK_FLAGS "${RE
 target_include_directories(${NAME} PUBLIC "${REFPROP_FORTRAN_ABS_PATH}")
 
 if (NOT REFPROP_NO_NUMPY AND (NOT REFPROP_NO_PYTHON))
+  if (NOT EXISTS ${PYTHON_EXECUTABLE})
+      message(FATAL_ERROR "Specified Python executable does not exist: ${PYTHON_EXECUTABLE}")
+    endif()
   # Build the REFPROP.h header file to go with this shared library
   # See for instance https://samthursfield.wordpress.com/2015/11/21/cmake-dependencies-between-targets-and-files-and-custom-commands/\
   # or other places on the internet...
